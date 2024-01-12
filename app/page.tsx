@@ -17,16 +17,16 @@ export default function Chat() {
   }, [messages])
 
   return (
-    <section>
-      <h1>AI Chatbot</h1>
-      <div className='container flex h-screen items-center justify-center'>
-        <div className='w-full max-w-md'>
+    <section className='text-zinc-700'>
+      <div className='container flex h-screen flex-col items-center justify-center'>
+        <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1>
+        <div className='mt-4 w-full max-w-lg'>
           <ScrollArea
             className='mb-2 h-[400px] rounded-md border p-4'
             ref={ref}
           >
             {messages.map(m => (
-              <div key={m.id} className='whitespace-pre-wrap pr-10'>
+              <div key={m.id} className='mr-6 whitespace-pre-wrap md:mr-12'>
                 {m.role === 'user' ? (
                   <div className='mb-6 flex gap-3'>
                     <Avatar>
@@ -50,7 +50,7 @@ export default function Chat() {
                     </Avatar>
                     <div className='mt-1.5'>
                       <p className='font-semibold'>Bot</p>
-                      <div className='mt-1.5 text-sm text-zinc-500'>
+                      <div className='mt-2 text-sm text-zinc-500'>
                         {m.content}
                       </div>
                     </div>
