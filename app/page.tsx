@@ -1,14 +1,18 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { useChat } from 'ai/react'
 import { useEffect, useRef } from 'react'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { SendHorizontalIcon } from 'lucide-react'
+import CopyToClipboard from '@/components/CopyToClipboard'
 
 export default function Chat() {
   const ref = useRef<HTMLDivElement>(null)
-  const { messages, input, handleInputChange, handleSubmit } = useChat()
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat()
 
   useEffect(() => {
     if (ref.current === null) return
@@ -49,7 +53,10 @@ export default function Chat() {
                       </AvatarFallback>
                     </Avatar>
                     <div className='mt-1.5'>
-                      <p className='font-semibold'>Bot</p>
+                      <div className='flex justify-between'>
+                        <p className='font-semibold'>Bot</p>
+                        <CopyToClipboard message={m} className='-mt-1' />
+                      </div>
                       <div className='mt-2 text-sm text-zinc-500'>
                         {m.content}
                       </div>
@@ -60,13 +67,22 @@ export default function Chat() {
             ))}
           </ScrollArea>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className='relative'>
             <Input
               value={input}
-              className='placeholder:italic placeholder:text-emerald-600/75'
-              placeholder='Ask me anything...'
               onChange={handleInputChange}
+              placeholder='Ask me anything...'
+              className='placeholder:italic placeholder:text-zinc-600/75 focus-visible:ring-zinc-500'
             />
+            <Button
+              size='icon'
+              type='submit'
+              variant='secondary'
+              disabled={isLoading}
+              className='absolute right-1 top-1 h-8 w-10'
+            >
+              <SendHorizontalIcon className='h-5 w-5 text-emerald-500' />
+            </Button>
           </form>
         </div>
       </div>
