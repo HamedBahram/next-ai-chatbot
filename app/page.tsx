@@ -11,7 +11,7 @@ import CopyToClipboard from '@/components/CopyToClipboard'
 
 export default function Chat() {
   const ref = useRef<HTMLDivElement>(null)
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat()
 
   useEffect(() => {
@@ -29,6 +29,9 @@ export default function Chat() {
             className='mb-2 h-[400px] rounded-md border p-4'
             ref={ref}
           >
+            {error && (
+              <div className='text-sm text-red-400'>{error.message}</div>
+            )}
             {messages.map(m => (
               <div key={m.id} className='mr-6 whitespace-pre-wrap md:mr-12'>
                 {m.role === 'user' ? (
@@ -52,7 +55,7 @@ export default function Chat() {
                         AI
                       </AvatarFallback>
                     </Avatar>
-                    <div className='mt-1.5'>
+                    <div className='mt-1.5 w-full'>
                       <div className='flex justify-between'>
                         <p className='font-semibold'>Bot</p>
                         <CopyToClipboard message={m} className='-mt-1' />
