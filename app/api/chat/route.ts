@@ -3,14 +3,15 @@ import { OpenAIStream, StreamingTextResponse } from 'ai'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'edge'
-let openai: OpenAI
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return new NextResponse('Missing OpenAI API Key.', { status: 400 })
+    }
+
     const { messages } = await req.json()
-
-    if (!openai) openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       stream: true,
