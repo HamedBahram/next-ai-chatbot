@@ -10,8 +10,12 @@ import CopyToClipboard from '@/components/copy-to-clipboard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import { SendHorizontalIcon } from 'lucide-react'
+import { useClerk, useUser } from '@clerk/nextjs'
 
 export default function Chat() {
+  const { isLoaded, isSignedIn, user } = useUser()
+  const { openSignIn } = useClerk()
+
   const ref = useRef<HTMLDivElement>(null)
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
     useChat({
@@ -27,14 +31,24 @@ export default function Chat() {
   useEffect(() => {
     if (ref.current === null) return
     ref.current.scrollTo(0, ref.current.scrollHeight)
-    // ref.current.scrollTop = ref.current.scrollHeight
   }, [messages])
 
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (isSignedIn) {
+      handleSubmit(e)
+    } else {
+      openSignIn()
+    }
+  }
+
   return (
-    <section className='text-zinc-700'>
-      <div className='container flex h-screen flex-col items-center justify-center'>
-        <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1>
-        <div className='mt-4 w-full max-w-lg'>
+    <section className='py-24 text-zinc-700'>
+      <div className='container max-w-3xl'>
+        <h1 className='text-center font-serif text-2xl font-medium'>
+          AI Chatbot
+        </h1>
+        <div className='mx-auto mt-4 w-full max-w-lg'>
           <ScrollArea
             className='mb-2 h-[400px] rounded-md border p-4'
             ref={ref}
@@ -82,18 +96,20 @@ export default function Chat() {
             ))}
           </ScrollArea>
 
-          <form onSubmit={handleSubmit} className='relative'>
+          <form onSubmit={onSubmit} className='relative'>
             <Input
               value={input}
               onChange={handleInputChange}
-              placeholder='Ask me anything...'
+              placeholder={
+                isSignedIn ? 'Ask me anything...' : 'Sign in to start...'
+              }
               className='pr-12 placeholder:italic placeholder:text-zinc-600/75 focus-visible:ring-zinc-500'
             />
             <Button
               size='icon'
               type='submit'
               variant='secondary'
-              disabled={isLoading}
+              disabled={isLoading || !isLoaded}
               className='absolute right-1 top-1 h-8 w-10'
             >
               <SendHorizontalIcon className='h-5 w-5 text-emerald-500' />
