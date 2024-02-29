@@ -14,11 +14,11 @@ model User {
   lastName               String?
   imageUrl               String?
   clerkUserId            String    @unique
-  StripeCustomerId       String?   @unique
-  StripeSubscriptionId   String?
-  StripePriceId          String?
-  StripeCurrentPeriodEnd DateTime?
-  Credits                Int       @default(3)
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  credits                Int       @default(3)
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 }
