@@ -22,6 +22,8 @@ export default function Chat() {
   const { openSignIn, session } = useClerk()
 
   const credits = user?.publicMetadata?.credits
+  const newUser = typeof credits === 'undefined'
+  const paidUser = user?.publicMetadata?.stripeCustomerId
 
   const ref = useRef<HTMLDivElement>(null)
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
@@ -89,10 +91,10 @@ export default function Chat() {
       <div className='container max-w-3xl'>
         {/* Credits section */}
         <div className='mx-auto flex max-w-lg items-center justify-between px-1'>
-          {/* <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1> */}
+          <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1>
 
           <div>
-            {isSignedIn && typeof credits === 'undefined' && (
+            {isSignedIn && newUser && (
               <Button
                 size='sm'
                 variant='outline'
@@ -111,13 +113,15 @@ export default function Chat() {
             )}
           </div>
 
-          <Button
-            size='sm'
-            variant='secondary'
-            onClick={() => setSubscriptionDialogOpen(true)}
-          >
-            Get more credits
-          </Button>
+          {isSignedIn && !paidUser && !newUser && (
+            <Button
+              size='sm'
+              variant='secondary'
+              onClick={() => setSubscriptionDialogOpen(true)}
+            >
+              Get more credits
+            </Button>
+          )}
         </div>
 
         {/* Chat area */}
