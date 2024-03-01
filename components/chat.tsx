@@ -1,12 +1,13 @@
 'use client'
 
 import { useChat } from 'ai/react'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import CopyToClipboard from '@/components/copy-to-clipboard'
+import SubscriptionDialog from '@/components/subscription-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 import { SendHorizontalIcon, Zap } from 'lucide-react'
@@ -15,6 +16,8 @@ import { toast } from 'sonner'
 import { AddFreeCredits } from '@/lib/actions'
 
 export default function Chat() {
+  const [subscriptionDialogOpen, setSubscriptionDialogOpen] = useState(false)
+
   const { isLoaded, isSignedIn, user } = useUser()
   const { openSignIn, session } = useClerk()
 
@@ -39,8 +42,12 @@ export default function Chat() {
               openSignIn()
               break
             case 402:
-              // TODO: Open a modal to buy credits
-              toast.error('You have no credits left.')
+              toast.error('You have no credits left.', {
+                action: {
+                  label: 'Get more',
+                  onClick: () => setSubscriptionDialogOpen(true)
+                }
+              })
               break
             default:
               toast.error(error?.message || 'Something went wrong!')
@@ -80,28 +87,40 @@ export default function Chat() {
   return (
     <section className='py-24 text-zinc-700'>
       <div className='container max-w-3xl'>
+        {/* Credits section */}
         <div className='mx-auto flex max-w-lg items-center justify-between px-1'>
-          <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1>
+          {/* <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1> */}
 
-          {isSignedIn && typeof credits === 'undefined' && (
-            <Button
-              size='sm'
-              variant='outline'
-              className='border-emerald-500'
-              onClick={handleClick}
-            >
-              Redeem 10 Free Credits
-            </Button>
-          )}
+          <div>
+            {isSignedIn && typeof credits === 'undefined' && (
+              <Button
+                size='sm'
+                variant='outline'
+                className='border-emerald-500'
+                onClick={handleClick}
+              >
+                Redeem 10 Free Credits
+              </Button>
+            )}
+            {isSignedIn && typeof credits === 'number' && (
+              <div className='flex items-center gap-2'>
+                <Zap className='h-5 w-5 text-emerald-500' />
+                <span className='text-sm text-zinc-500'>Credits:</span>
+                <span className='font-medium'>{credits}</span>
+              </div>
+            )}
+          </div>
 
-          {isSignedIn && typeof credits === 'number' && (
-            <div className='flex items-center gap-2'>
-              <Zap className='h-5 w-5 text-emerald-500' />
-              <span className='text-sm text-zinc-500'>Credits:</span>
-              <span className='font-medium'>{credits}</span>
-            </div>
-          )}
+          <Button
+            size='sm'
+            variant='secondary'
+            onClick={() => setSubscriptionDialogOpen(true)}
+          >
+            Get more credits
+          </Button>
         </div>
+
+        {/* Chat area */}
         <div className='mx-auto mt-3 w-full max-w-lg'>
           <ScrollArea
             className='mb-2 h-[400px] rounded-md border p-4'
@@ -168,6 +187,12 @@ export default function Chat() {
             </Button>
           </form>
         </div>
+
+        {/* Subscription dialog */}
+        <SubscriptionDialog
+          open={subscriptionDialogOpen}
+          onOpenChange={setSubscriptionDialogOpen}
+        />
       </div>
     </section>
   )
