@@ -9,12 +9,16 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import CopyToClipboard from '@/components/copy-to-clipboard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-import { SendHorizontalIcon } from 'lucide-react'
+import { SendHorizontalIcon, Zap } from 'lucide-react'
 import { useClerk, useUser } from '@clerk/nextjs'
+import { toast } from 'sonner'
+import { AddFreeCredits } from '@/lib/actions'
 
 export default function Chat() {
   const { isLoaded, isSignedIn, user } = useUser()
-  const { openSignIn } = useClerk()
+  const { openSignIn, session } = useClerk()
+
+  const credits = user?.publicMetadata?.credits
 
   const ref = useRef<HTMLDivElement>(null)
   const { messages, input, handleInputChange, handleSubmit, isLoading, error } =
@@ -25,7 +29,26 @@ export default function Chat() {
           role: 'system',
           content: 'You are an assistant that gives short answers.'
         }
-      ]
+      ],
+      onResponse: response => {
+        if (!response.ok) {
+          const status = response.status
+
+          switch (status) {
+            case 401:
+              openSignIn()
+              break
+            case 402:
+              // TODO: Open a modal to buy credits
+              toast.error('You have no credits left.')
+              break
+            default:
+              toast.error(error?.message || 'Something went wrong!')
+              break
+          }
+        }
+        session?.reload()
+      }
     })
 
   useEffect(() => {
@@ -42,20 +65,48 @@ export default function Chat() {
     }
   }
 
+  async function handleClick() {
+    const { success, error } = await AddFreeCredits()
+
+    if (error) {
+      toast.error(error)
+      return
+    }
+
+    toast.success('10 credits added successfully.')
+    session?.reload()
+  }
+
   return (
     <section className='py-24 text-zinc-700'>
       <div className='container max-w-3xl'>
-        <h1 className='text-center font-serif text-2xl font-medium'>
-          AI Chatbot
-        </h1>
-        <div className='mx-auto mt-4 w-full max-w-lg'>
+        <div className='mx-auto flex max-w-lg items-center justify-between px-1'>
+          <h1 className='font-serif text-2xl font-medium'>AI Chatbot</h1>
+
+          {isSignedIn && typeof credits === 'undefined' && (
+            <Button
+              size='sm'
+              variant='outline'
+              className='border-emerald-500'
+              onClick={handleClick}
+            >
+              Redeem 10 Free Credits
+            </Button>
+          )}
+
+          {isSignedIn && typeof credits === 'number' && (
+            <div className='flex items-center gap-2'>
+              <Zap className='h-5 w-5 text-emerald-500' />
+              <span className='text-sm text-zinc-500'>Credits:</span>
+              <span className='font-medium'>{credits}</span>
+            </div>
+          )}
+        </div>
+        <div className='mx-auto mt-3 w-full max-w-lg'>
           <ScrollArea
             className='mb-2 h-[400px] rounded-md border p-4'
             ref={ref}
           >
-            {error && (
-              <div className='text-sm text-red-400'>{error.message}</div>
-            )}
             {messages.map(m => (
               <div key={m.id} className='mr-6 whitespace-pre-wrap md:mr-12'>
                 {m.role === 'user' && (
@@ -98,6 +149,7 @@ export default function Chat() {
 
           <form onSubmit={onSubmit} className='relative'>
             <Input
+              name='message'
               value={input}
               onChange={handleInputChange}
               placeholder={

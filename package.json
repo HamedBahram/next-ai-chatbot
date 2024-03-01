@@ -19,13 +19,16 @@
     "clsx": "^2.1.0",
     "lucide-react": "^0.309.0",
     "next": "14.0.4",
+    "next-themes": "^0.2.1",
     "openai": "^4.24.3",
     "prisma": "^5.10.2",
     "react": "^18",
     "react-dom": "^18",
+    "sonner": "^1.4.2",
     "svix": "^1.20.0",
     "tailwind-merge": "^2.2.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@types/node": "^20",

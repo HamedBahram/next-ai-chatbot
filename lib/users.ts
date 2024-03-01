@@ -10,22 +10,34 @@ export async function createUser(data: User) {
   }
 }
 
-export async function getUserById(id: string) {
+export async function getUserById({
+  id,
+  clerkUserId
+}: {
+  id?: string
+  clerkUserId?: string
+}) {
   try {
-    const todo = await prisma.user.findUnique({ where: { id } })
-    return { todo }
+    if (!id && !clerkUserId) {
+      throw new Error('id or clerkUserId is required')
+    }
+
+    const query = id ? { id } : { clerkUserId }
+
+    const user = await prisma.user.findUnique({ where: query })
+    return { user }
   } catch (error) {
     return { error }
   }
 }
 
-export async function UpdateUser(id: string, data: User) {
+export async function UpdateUser(id: string, data: Partial<User>) {
   try {
-    const todo = await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id },
       data
     })
-    return { todo }
+    return { user }
   } catch (error) {
     return { error }
   }
